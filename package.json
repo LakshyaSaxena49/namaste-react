@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "this is REACT course",
   "scripts": {
+    "start": "parcel index.html",
     "test": "jest"
   },
   "repository": {
@@ -13,17 +14,19 @@
     "react",
     "namaste",
     "react",
-    "akshay",
-    "saini"
+    "Lakshya",
+    "saxena"
   ],
   "author": "lakshya saxena",
   "license": "ISC",
   "devDependencies": {
+    "@parcel/transformer-react-refresh-wrap": "^2.14.4",
     "parcel": "^2.14.1"
   },
   "dependencies": {
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "react-router-dom": "^6.22.3"
   },
   "browsersList": [
     "last 2 Chrome version",
