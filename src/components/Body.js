@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import RestaurantCard from "./RestaurantCard";
 import resList from "../utils/mockData";
 import Shimmer from "./Shimmer";
+import { Link } from "react-router-dom";
 
 const Body = () => {
   // useState stores a copy that can be filtered
@@ -75,21 +76,27 @@ const Body = () => {
           className="filter-btn"
           onClick={() => {
             const filteredRestaurants = ListOfRestaurants.filter(
-              (res) => res?.info?.avgRating > 4.5
+              (res) => res?.info?.avgRating > 4.2
             );
             setFilteredRestaurants(filteredRestaurants);
           }}
         >
-          Top Rated Restaurants
+          Ratings(4.2+) 
         </button>
       </div>
       <div className="res-container">
         {Array.isArray(filteredRestaurants) && filteredRestaurants.length > 0 ? (
           filteredRestaurants.map((restaurant) => (
-            <RestaurantCard key={restaurant.info.id} resData={restaurant} />
+            <Link
+              key={restaurant.info.id}
+              to={"/restaurants/" + restaurant.info.id}
+              style={{ textDecoration: 'none', color: 'inherit' }} // Basic styling to remove link default appearance
+            >
+              <RestaurantCard resData={restaurant} />
+            </Link>
           ))
         ) : (
-          <p>No restaurants found</p>
+          <p>No restaurants found for your search.</p>
         )}
       </div>
     </div>
