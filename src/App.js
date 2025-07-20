@@ -1,12 +1,26 @@
-import React from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
 import Header from "./components/Header.js";
 import Body from "./components/Body.js";   
-import About from "./components/About.js"; 
+//import About from "./components/About.js"; 
 import Contact from "./components/Contact.js"; 
 import Error from "./components/Error.js";  
 import RestaurantMenu from "./components/RestaurantMenu.js"; 
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
+import Shimmer from "./components/Shimmer.js";
+import UserContext from "./utils/UserContext.js";
+import { Provider } from "react-redux";
+import appStore from "./utils/appStore.js";
+
+// Chunking
+// Code Splitting
+// Dynamic Bundling
+// Lazy LOADING
+// on demand loading
+// dynamic import
+
+const Grocery = lazy(() => import("./components/Grocery.js")); //import ka tareeka .
+const About = lazy(() => import("./components/About.js"));
 
 /**
  * AppLayout Component:
@@ -15,14 +29,42 @@ import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
  * and an Outlet which is a placeholder for child routes to be rendered.
  */
 const AppLayout = () => {
+
+  const [userName, setUserName] = useState("");
+  useEffect(() => { //authentication
+    //make an API call and send username and password
+    const data = {
+      name: "lakhya saxena",
+    };
+    setUserName(data.name);
+  }, []);
+
+
+  const [darkMode, setDarkMode] = useState(false); //  Centralized Dark Mode
+
+  //  Toggle dark mode by applying Tailwind's 'dark' class to <html>
+  useEffect(() => {
+    const root = window.document.documentElement;
+    if (darkMode) {
+      root.classList.add("dark");
+    } else {
+      root.classList.remove("dark");
+    }
+  }, [darkMode]);
+
   console.log("Applayout rendered"); // Log to see when AppLayout re-renders
+
   return (
+    <Provider store = {appStore}>
+    <UserContext.Provider value = {{ loggedInUser: userName}} >
     <div className="app">
       {/* The Header component will always be visible */}
-      <Header />
+      <Header darkMode={darkMode} setDarkMode={setDarkMode} />
       {/* Outlet renders the component for the current matched child route */}
-      <Outlet />
+      <Outlet context={{ darkMode }} />
     </div>
+    </UserContext.Provider>
+    </Provider>
   );
 };
 
@@ -53,6 +95,14 @@ const appRouter = createBrowserRouter([
         // Route for the "/contact" path
         path: "/contact",
         element: <Contact />, // Renders the Contact component
+      },
+      {
+        path: "/grocery",
+        element: (
+          <Suspense fallback={<Shimmer></Shimmer>}>
+            <Grocery />
+          </Suspense>
+        )
       },
       {
         // Route for dynamic restaurant menus, e.g., "/restaurants/123"

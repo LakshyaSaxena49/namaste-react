@@ -1,58 +1,24 @@
-import { useEffect, useState } from "react";
-import Shimmer from "./Shimmer.js"; // Ensure .js extension for local imports
-import { useParams } from "react-router-dom"; // Import useParams to get URL parameters
+import { useState } from "react";
+import Shimmer from "./Shimmer.js"; 
+import { useParams } from "react-router-dom"; 
+// Import useParams to get URL parameters
+import useRestaurantMenu from "../utils/userRestaurantMenu.js"; 
+import RestaurantCategory from "./RestaurantCategory.js";
 
 /**
  * RestaurantMenu Component:
  * Fetches and displays the menu for a specific restaurant using its ID from the URL.
  */
 const RestaurantMenu = () => {
-  // State to store the fetched restaurant information
-  const [resInfo, setResInfo] = useState(null);
-  // State to store any error messages during data fetching
-  const [error, setError] = useState(null);
-
   // useParams hook to extract the 'resId' from the URL (e.g., /restaurants/123 -> resId = "123")
   const { resId } = useParams();
 
-  // useEffect hook to fetch menu data when the component mounts or resId changes
-  useEffect(() => {
-    fetchMenu();
-  }, [resId]); // Dependency array: re-run fetchMenu if resId changes
+  const resInfo = useRestaurantMenu(resId); 
+  
+  const [showIndex, setshowIndex] = useState(0);
 
-  /**
-   * fetchMenu:
-   * Asynchronously fetches the restaurant menu data from the Swiggy API.
-   */
-  const fetchMenu = async () => {
-    setError(null); // Clear previous errors before a new fetch
-    try {
-      // Construct the API URL using the dynamic resId
-      // Ensure the lat/lng are appropriate for a restaurant that exists in Swiggy's database
-      const API_URL = `https://www.swiggy.com/dapi/menu/pl?page-type=REGULAR_MENU&complete-menu=true&lat=28.63270&lng=77.21980&restaurantId=${resId}&catalog_qa=undefined&submitAction=ENTER`;
 
-      const response = await fetch(API_URL);
-
-      // Check if the response was successful (status code 200-299)
-      if (!response.ok) {
-        // If not successful, throw an error with the status text
-        throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
-      }
-
-      const json = await response.json();
-
-      // Basic check for data existence in the response
-      if (!json.data) {
-        throw new Error("No data found in the API response.");
-      }
-
-      setResInfo(json.data); // Update state with the fetched data
-    } catch (err) {
-      console.error("Error fetching menu:", err);
-      setError("Error fetching restaurant data. Please try again later."); // Set user-friendly error message
-      setResInfo(null); // Clear any partial data
-    }
-  };
+  const [error, setError] = useState(null);
 
   // Display error message if an error occurred
   if (error) {
@@ -89,8 +55,7 @@ const RestaurantMenu = () => {
 
   let categories = [];
   if (categoryCards) {
-    // Filter for cards that are actual menu categories (ItemCategory or NestedItemCategory)
-    // and ensure they have itemCards
+    // Filter for cards that are actual menu categories (ItemCategory or NestedItemCategory) 
     categories = categoryCards
       .map((card) => card?.card?.card) // Access the inner card.card.card object
       .filter(
@@ -102,50 +67,33 @@ const RestaurantMenu = () => {
   }
 
   return (
-    <div className="menu"> 
-      <h1>{name}</h1> 
-      <p>
+    <div className=""> 
+      <h1 className="text-gray-800 dark:text-white-100 text-center p-2 mb-4 text-xl">{name}</h1> 
+      <p className="text-gray-600 dark:text-white-300 text-center mb-4">
         {cuisines?.join(", ")} - {costForTwoMessage}
       </p>
 
-      <h2>Menu</h2> 
+      <h2 className="text-xl font-semibold mb-4">Menu</h2> 
       {categories.length > 0 ? (
+
         // Iterate over each menu category
         categories.map((category, index) => (
-          <div key={category.title || index}> 
-            <h3>{category.title}</h3>
-            {category.itemCards && category.itemCards.length > 0 ? (
-              <ul>
-                {/* Iterate over each item within the category */}
-                {category.itemCards.map((itemCard) => (
-                  <li key={itemCard.card.info.id}> 
-                    <div>
-                      <div>
-                        <p>{itemCard.card.info.name}</p>
-                        <p>
-                          ₹{((itemCard.card.info.price || itemCard.card.info.defaultPrice) / 100).toFixed(2)}
-                        </p>
-                        <p>{itemCard.card.info.description}</p>
-                      </div>
-                      {/* Display item image if available */}
-                      {itemCard.card.info.imageId && (
-                        <img
-                          src={`https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_208,h_208,c_fit/${itemCard.card.info.imageId}`}
-                          alt={itemCard.card.info.name}
-                          onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/96x96/E0E0E0/808080?text=No+Image"; }} // Fallback for broken images
-                        />
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p>No items in this category.</p>
-            )}
-          </div>
+          <RestaurantCategory
+            key={category.title || index}
+            category={category}
+            isOpen={index === showIndex}
+            setshowIndex={() => {
+              // If clicking the already open one, close it
+              if (showIndex === index) {
+                setshowIndex(null);
+              } else {
+                setshowIndex(index);
+              }
+            }}
+          />
         ))
       ) : (
-        <p>No menu categories found for this restaurant. It might be closed or the API structure has changed.</p>
+        <p className="text-gray-600 dark:text-gray-300">No menu categories found for this restaurant. It might be closed or the API structure has changed.</p>
       )}
     </div>
   );

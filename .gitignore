@@ -6,6 +6,7 @@ node_modules/
 
 # Parcel cache
 .cache/
+.parcel-cache/
 dist/
 
 # OS-specific
