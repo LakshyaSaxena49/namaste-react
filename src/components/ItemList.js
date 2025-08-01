@@ -6,12 +6,13 @@ const ItemList = ({ items }) => {
   const dispatch = useDispatch();
 
   const handleAddToCart = (item) => {
-    dispatch(addItems(item));
+    dispatch(addItems(item.card.info));
   };
 
   return (
     <div>
       {items.map((item) => {
+        // Destructure item details
         const { id, name, description, price, defaultPrice, imageId } = item.card.info;
 
         return (
@@ -19,11 +20,12 @@ const ItemList = ({ items }) => {
             key={id}
             className="p-4 m-4 border-b border-gray-300 dark:border-gray-600 text-left flex justify-between gap-4"
           >
+            {/* Left section - item name, price, description */}
             <div className="w-9/12">
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-semibold dark:text-white">{name}</h3>
                 <span className="text-gray-800 dark:text-gray-300 text-sm">
-                  ₹{(price || defaultPrice) / 100}
+                  ₹{((price || defaultPrice) / 100).toFixed(2)}
                 </span>
               </div>
               {description && (
@@ -33,6 +35,7 @@ const ItemList = ({ items }) => {
               )}
             </div>
 
+            {/* Right section - item image and Add+ button */}
             <div className="w-3/12 relative flex justify-center items-center">
               {imageId && (
                 <img
